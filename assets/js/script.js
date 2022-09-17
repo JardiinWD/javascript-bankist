@@ -61,6 +61,34 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+/** Funzione che mostra a schermo i movimenti
+ * 
+ * @param {object} movements Array di movimenti 
+ */
+const displayMovement = function (movements) {
+  // Svuotare il container dai dati iniziali
+  containerMovements.innerHTML = '';
+  movements.forEach((movement, index) => {
+
+    // Decidere classi in caso di operazione positiva (deposito) o negativa
+    const typeMovement = movement > 0 ? 'deposit' : 'withdrawal'
+
+    const htmlMovement =
+      `
+      <div class="movements__row">
+        <!-- /.movements__type movements__type--deposit -->
+        <div class="movements__type movements__type--${typeMovement}">${index + 1} ${typeMovement}</div>
+        <!-- /.movements__value -->
+        <div class="movements__value">${movement}€</div>
+      </div>
+      `
+    // Inietto nel Container le nuove Row dinamiche
+    containerMovements.insertAdjacentHTML('afterbegin', htmlMovement)
+  })
+}
+
+displayMovement(account1.movements)
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
