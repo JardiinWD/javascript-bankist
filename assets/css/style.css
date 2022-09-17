@@ -1,13 +1,14 @@
-/*
- * Use this CSS to learn some intersting techniques,
- * in case you're wondering how I built the UI.
- * Have fun! 😁
- */
 
-* {
+/*#region Stylesheet rules */
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: inherit;
+  list-style: none;
+  text-decoration: none;
 }
 
 html {
@@ -22,6 +23,10 @@ body {
   height: 100vh;
   padding: 2rem;
 }
+
+/*#endregion */
+
+/*#region Navbar rules */
 
 nav {
   display: flex;
@@ -83,7 +88,9 @@ nav {
   color: #777;
 }
 
-/* MAIN */
+/*#endregion */
+
+/*#region Main rules */
 .app {
   position: relative;
   max-width: 100rem;
@@ -92,7 +99,6 @@ nav {
   grid-template-columns: 4fr 3fr;
   grid-template-rows: auto repeat(3, 15rem) auto;
   gap: 2rem;
-
   /* NOTE This creates the fade in/out anumation */
   opacity: 0;
   transition: all 1s;
@@ -122,7 +128,8 @@ nav {
   font-weight: 400;
 }
 
-/* MOVEMENTS */
+/*#region Movements rules */
+
 .movements {
   grid-row: 2 / span 3;
   background-color: #fff;
@@ -167,7 +174,10 @@ nav {
   margin-left: auto;
 }
 
-/* SUMMARY */
+/*#endregion */
+
+/*#region Summary rules */
+
 .summary {
   grid-row: 5 / 6;
   display: flex;
@@ -206,7 +216,10 @@ nav {
   cursor: pointer;
 }
 
-/* OPERATIONS */
+/*#endregion */
+
+/*#region Operations rules */
+
 .operation {
   border-radius: 1rem;
   padding: 3rem 4rem;
@@ -295,3 +308,7 @@ h2 {
 .timer {
   font-weight: 600;
 }
+
+/*#endregion */
+
+/*#endregion */
