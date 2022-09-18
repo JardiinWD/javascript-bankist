@@ -61,6 +61,8 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
 /** Funzione che mostra a schermo i movimenti
  * 
  * @param {object} movements Array di movimenti 
@@ -86,8 +88,91 @@ const displayMovement = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', htmlMovement)
   })
 }
-
 displayMovement(account1.movements)
+
+/**
+ * 
+ * @param {object} accs Array di Account
+ * @returns 
+ */
+const createUsernames = function (accs) {
+  accs.forEach(function (acc) {
+    acc.username = acc.owner.toLowerCase().split(' ').map((word) => word[0]).join('')
+    // console.log(username); // output stw
+    // ora rendo tutto in lowercase ed eseguo uno split in base agli spazi vuoti
+    // Eseguo anche il map sull'array che viene generato tramite split
+    // Selezionando la prima lettera di ogni parola. Poichè al metodo Map è ancora un array
+    // tramite join trasformo in una singola parola con le sole iniziali
+    console.log(acc.username);
+  })
+}
+
+// Computing Username
+console.log("Verifica degli username della funzione");
+console.log(createUsernames(accounts))
+console.log("--------------------");
+console.log("Verifica del mio array di oggetti");
+console.log(accounts);
+console.log("--------------------");
+
+
+const depositsFilter = movements.filter(element => element > 0)
+console.log("Questo array filtrato per depositi");
+console.log(depositsFilter);
+console.log("-------------");
+// Ora guardo i Ritiri da parte dell'utente
+const withdrawlFilter = movements.filter(element => element < 0)
+console.log("Questo array filtrato per Ritiri");
+console.log(withdrawlFilter);
+console.log("-------------");
+
+// Mostro a display il mio current balance
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, curr) => acc + curr, 0)
+  labelBalance.textContent = `${balance}€`
+}
+// Invoco la mia function
+calcDisplayBalance(account1.movements)
+
+const calcDisplaySummary = function (movements) {
+  // Entrate
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0)
+  // Uscite  
+  const outcomes = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0)
+  // Interesse
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => deposit * 1.2 / 100)
+    // Solo se interessi maggiori o uguali a 1
+    .filter(interest => interest >= 1)
+    .reduce((acc, int) => acc + int, 0)
+  // Aggiungo la mia variabile incomes e la mostro nel DOM
+  labelSumIn.textContent = `${incomes}€`
+  labelSumOut.textContent = `${Math.abs(outcomes)}€`
+  labelSumInterest.textContent = `${interest}€`
+}
+// Invoco funzione per i label
+calcDisplaySummary(account1.movements)
+
+const maxMovements = movements.reduce((acc, cur) => {
+  // console.log(cur); // Questi i singoli valori dell'array
+  // Se l'accumulator fosse più grande del current value
+  if (acc > cur) {
+    console.log(`Il valore accumulator (${acc}) è più alto del valore current (${cur})`);
+    return acc // Return dell'accumulatore
+  } else {
+    console.log(`Il valore current (${cur}) è più alto del valore accumulator (${acc})`);
+    return cur // Return del current
+  }
+  // Come valore iniziale prendiamo primo numero dell'array
+}, movements[0])
+
+console.log("Questo è il numero più alto nell'array di Movements");
+console.log(maxMovements);
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -99,6 +184,5 @@ const currencies = new Map([
   ['GBP', 'Pound sterling'],
 ]);
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-/////////////////////////////////////////////////
+
