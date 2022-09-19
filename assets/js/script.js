@@ -67,10 +67,14 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
  * 
  * @param {object} movements Array di movimenti 
  */
-const displayMovement = function (movements) {
+const displayMovement = function (movements, sort = false) {
   // Svuotare il container dai dati iniziali
   containerMovements.innerHTML = '';
-  movements.forEach((movement, index) => {
+  // Ordinamento ascendente dei valori (depositi e ritiri)
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements
+
+
+  movs.forEach((movement, index) => {
 
     // Decidere classi in caso di operazione positiva (deposito) o negativa
     const typeMovement = movement > 0 ? 'deposit' : 'withdrawal'
@@ -178,10 +182,8 @@ const updateUI = (acc) => {
   calcDisplaySummary(acc)
 }
 
-
 // Evento al Click per il login
 let currentAccount; // Dichiaro senza assegnare
-
 btnLogin.addEventListener('click', (e) => {
   e.preventDefault() // Previene il reload al click
   console.log("Login"); // Verifica in console
@@ -201,6 +203,7 @@ btnLogin.addEventListener('click', (e) => {
   }
 })
 
+// Evento per trasferire denaro
 btnTransfer.addEventListener('click', (e) => {
   e.preventDefault() // Blocco il Refresh
   const amountTransfer = Number(inputTransferAmount.value) // Quanto ammonta il trasferimento
@@ -219,6 +222,49 @@ btnTransfer.addEventListener('click', (e) => {
   }
   // Ripulisco i campi
   inputTransferAmount.value = inputTransferTo.value = ''
+})
+
+// Condizione con Some
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault() // Tolgo il Refresh
+  const amountLoan = Number(inputLoanAmount.value)
+
+  if (amountLoan > 0 && currentAccount.movements.some(mov => mov >= amountLoan * 0.1)) {
+    // Aggiungi il movement ai movimenti
+    currentAccount.movements.push(amountLoan)
+    // Update UI
+    updateUI(currentAccount)
+    // Pulizia Campi
+    inputLoanAmount.value = ''
+  }
+})
+
+// Evento per chiudere account
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault()
+  const confirmUser = inputCloseUsername.value
+  const confirmPin = Number(inputClosePin.value)
+  if (confirmUser === currentAccount.username && currentAccount.pin === confirmPin) {
+    // console.log("Puoi cancellare Account");
+    const indexAccount = accounts.findIndex(acc => acc.username === currentAccount.username)
+    console.log(indexAccount); // Output 0
+    // Cancellare Account
+    accounts.splice(indexAccount, 1)
+    // Nascondere l'UI
+    containerApp.style.opacity = 0
+  } else {
+    console.log("Non puoi cancellare Account");
+  }
+  // Pulire i Campi 
+  inputCloseUsername.value = inputClosePin.value = ''
+})
+
+let sorted = false // State iniziale False
+btnSort.addEventListener('click', (e) => {
+  e.preventDefault() // Rimuovo il refresh
+  displayMovement(currentAccount.movements, !sorted) // Ora lo lascio a true
+  sorted = !sorted // Al click continuo a cambiare lo State
+  // Serve apposta
 })
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
