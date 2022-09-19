@@ -88,7 +88,6 @@ const displayMovement = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', htmlMovement)
   })
 }
-displayMovement(account1.movements)
 
 /**
  * 
@@ -127,26 +126,24 @@ console.log(withdrawlFilter);
 console.log("-------------");
 
 // Mostro a display il mio current balance
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, curr) => acc + curr, 0)
-  labelBalance.textContent = `${balance}€`
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, curr) => acc + curr, 0)
+  labelBalance.textContent = `${acc.balance}€`
 }
-// Invoco la mia function
-calcDisplayBalance(account1.movements)
 
-const calcDisplaySummary = function (movements) {
+const calcDisplaySummary = function (acc) {
   // Entrate
-  const incomes = movements
+  const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0)
   // Uscite  
-  const outcomes = movements
+  const outcomes = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0)
   // Interesse
-  const interest = movements
+  const interest = acc.movements
     .filter(mov => mov > 0)
-    .map(deposit => deposit * 1.2 / 100)
+    .map(deposit => deposit * acc.interest / 100)
     // Solo se interessi maggiori o uguali a 1
     .filter(interest => interest >= 1)
     .reduce((acc, int) => acc + int, 0)
@@ -155,8 +152,6 @@ const calcDisplaySummary = function (movements) {
   labelSumOut.textContent = `${Math.abs(outcomes)}€`
   labelSumInterest.textContent = `${interest}€`
 }
-// Invoco funzione per i label
-calcDisplaySummary(account1.movements)
 
 const maxMovements = movements.reduce((acc, cur) => {
   // console.log(cur); // Questi i singoli valori dell'array
@@ -174,6 +169,57 @@ const maxMovements = movements.reduce((acc, cur) => {
 console.log("Questo è il numero più alto nell'array di Movements");
 console.log(maxMovements);
 
+const updateUI = (acc) => {
+  // Mostra Movimenti per il singolo account
+  displayMovement(acc.movements)
+  // Mostra il bilancio
+  calcDisplayBalance(acc)
+  // Mostra il sommario
+  calcDisplaySummary(acc)
+}
+
+
+// Evento al Click per il login
+let currentAccount; // Dichiaro senza assegnare
+
+btnLogin.addEventListener('click', (e) => {
+  e.preventDefault() // Previene il reload al click
+  console.log("Login"); // Verifica in console
+  currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value) // Verifica se Owner sia uguale al login
+  console.log(currentAccount);
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // console.log("Si, il pin è giusto");
+    labelWelcome.textContent = `Benvenuto, ${currentAccount.owner.split(' ')[0]}`
+    containerApp.style.opacity = 100; // Metti opacità a 100
+    // Pulisci i campi
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur() // Per rimuovere il Focus
+
+    // Update dell'UI
+    updateUI(currentAccount)
+  }
+})
+
+btnTransfer.addEventListener('click', (e) => {
+  e.preventDefault() // Blocco il Refresh
+  const amountTransfer = Number(inputTransferAmount.value) // Quanto ammonta il trasferimento
+  const receiverAccount = accounts.find(acc => acc.username === inputTransferTo.value) // A chi devo trasferire
+  console.log(amountTransfer);
+  console.log(receiverAccount);
+
+  // Verifica se ho abbastanza soldi
+  if (amountTransfer > 0 && receiverAccount && currentAccount.balance >= amountTransfer && receiverAccount?.username !== currentAccount.username) {
+    // Rimuovo dall'account di chi spedisce
+    currentAccount.movements.push(-amountTransfer)
+    // Aggiungo all'account di chi riceve
+    receiverAccount.movements.push(amountTransfer)
+    // Update dell'UI
+    updateUI(currentAccount)
+  }
+  // Ripulisco i campi
+  inputTransferAmount.value = inputTransferTo.value = ''
+})
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
