@@ -7,9 +7,22 @@
 // Data
 const account1 = {
   owner: 'Jonas Schmedtmann',
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2019-12-23T07:42:02.383Z',
+    '2020-01-28T09:15:04.904Z',
+    '2020-04-01T10:17:24.185Z',
+    '2020-05-08T14:11:59.604Z',
+    '2020-05-27T17:01:17.194Z',
+    '2020-07-11T23:36:17.929Z',
+    '2020-07-12T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT', // de-DE
 };
 
 const account2 = {
@@ -17,23 +30,22 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
 };
 
-const account3 = {
-  owner: 'Steven Thomas Williams',
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
-};
-
-const account4 = {
-  owner: 'Sarah Smith',
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
-};
-
-const accounts = [account1, account2, account3, account4];
+const accounts = [account1, account2];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -67,25 +79,32 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
  * 
  * @param {object} movements Array di movimenti 
  */
-const displayMovement = function (movements, sort = false) {
+const displayMovement = function (acc, sort = false) {
   // Svuotare il container dai dati iniziali
   containerMovements.innerHTML = '';
   // Ordinamento ascendente dei valori (depositi e ritiri)
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements
-
-
+  const movs = sort ? acc.movements.slice().sort((a, b) => a - b) : acc.movements
   movs.forEach((movement, index) => {
 
     // Decidere classi in caso di operazione positiva (deposito) o negativa
     const typeMovement = movement > 0 ? 'deposit' : 'withdrawal'
+
+    // prendo le date dall'array con il suo Indice
+    const date = new Date(acc.movementsDates[index])
+    const day = `${date.getDate()}`.padStart(2, 0)
+    const month = `${date.getMonth() + 1}`.padStart(2, 0)
+    const year = date.getFullYear()
+    const displayDate = `${day}/${month}/${year}`
 
     const htmlMovement =
       `
       <div class="movements__row">
         <!-- /.movements__type movements__type--deposit -->
         <div class="movements__type movements__type--${typeMovement}">${index + 1} ${typeMovement}</div>
+        <!-- /.movements__date -->
+        <div class="movements__date">${displayDate}</div>
         <!-- /.movements__value -->
-        <div class="movements__value">${movement}€</div>
+        <div class="movements__value">${movement.toFixed(2)}€</div>
       </div>
       `
     // Inietto nel Container le nuove Row dinamiche
@@ -111,28 +130,28 @@ const createUsernames = function (accs) {
 }
 
 // Computing Username
-console.log("Verifica degli username della funzione");
+// console.log("Verifica degli username della funzione");
 console.log(createUsernames(accounts))
-console.log("--------------------");
-console.log("Verifica del mio array di oggetti");
-console.log(accounts);
-console.log("--------------------");
+// console.log("--------------------");
+// console.log("Verifica del mio array di oggetti");
+// console.log(accounts);
+// console.log("--------------------");
 
-
+// Ora guardo i depositi sul conto dell'utente
 const depositsFilter = movements.filter(element => element > 0)
-console.log("Questo array filtrato per depositi");
-console.log(depositsFilter);
-console.log("-------------");
 // Ora guardo i Ritiri da parte dell'utente
 const withdrawlFilter = movements.filter(element => element < 0)
-console.log("Questo array filtrato per Ritiri");
-console.log(withdrawlFilter);
-console.log("-------------");
+// console.log("Questo array filtrato per depositi");
+// console.log(depositsFilter);
+// console.log("-------------");
+// console.log("Questo array filtrato per Ritiri");
+// console.log(withdrawlFilter);
+// console.log("-------------");
 
 // Mostro a display il mio current balance
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, curr) => acc + curr, 0)
-  labelBalance.textContent = `${acc.balance}€`
+  labelBalance.textContent = `${acc.balance.toFixed(2)}€`
 }
 
 const calcDisplaySummary = function (acc) {
@@ -147,35 +166,35 @@ const calcDisplaySummary = function (acc) {
   // Interesse
   const interest = acc.movements
     .filter(mov => mov > 0)
-    .map(deposit => deposit * acc.interest / 100)
+    .map(deposit => deposit * acc.interestRate / 100)
     // Solo se interessi maggiori o uguali a 1
     .filter(interest => interest >= 1)
     .reduce((acc, int) => acc + int, 0)
   // Aggiungo la mia variabile incomes e la mostro nel DOM
-  labelSumIn.textContent = `${incomes}€`
-  labelSumOut.textContent = `${Math.abs(outcomes)}€`
-  labelSumInterest.textContent = `${interest}€`
+  labelSumIn.textContent = `${incomes.toFixed(2)}€`
+  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}€`
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`
 }
 
 const maxMovements = movements.reduce((acc, cur) => {
   // console.log(cur); // Questi i singoli valori dell'array
   // Se l'accumulator fosse più grande del current value
   if (acc > cur) {
-    console.log(`Il valore accumulator (${acc}) è più alto del valore current (${cur})`);
+    // console.log(`Il valore accumulator (${acc}) è più alto del valore current (${cur})`);
     return acc // Return dell'accumulatore
   } else {
-    console.log(`Il valore current (${cur}) è più alto del valore accumulator (${acc})`);
+    // console.log(`Il valore current (${cur}) è più alto del valore accumulator (${acc})`);
     return cur // Return del current
   }
   // Come valore iniziale prendiamo primo numero dell'array
 }, movements[0])
 
-console.log("Questo è il numero più alto nell'array di Movements");
-console.log(maxMovements);
+// onsole.log("Questo è il numero più alto nell'array di Movements");
+// console.log(maxMovements);
 
 const updateUI = (acc) => {
   // Mostra Movimenti per il singolo account
-  displayMovement(acc.movements)
+  displayMovement(acc)
   // Mostra il bilancio
   calcDisplayBalance(acc)
   // Mostra il sommario
@@ -184,16 +203,43 @@ const updateUI = (acc) => {
 
 // Evento al Click per il login
 let currentAccount; // Dichiaro senza assegnare
+
+// Fake always login
+currentAccount = account1
+updateUI(currentAccount)
+containerApp.style.opacity = 100;
+
+// Button al Login iniziale
 btnLogin.addEventListener('click', (e) => {
   e.preventDefault() // Previene il reload al click
   console.log("Login"); // Verifica in console
   currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value) // Verifica se Owner sia uguale al login
   console.log(currentAccount);
 
-  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+  if (currentAccount?.pin === +inputLoginPin.value) {
     // console.log("Si, il pin è giusto");
     labelWelcome.textContent = `Benvenuto, ${currentAccount.owner.split(' ')[0]}`
     containerApp.style.opacity = 100; // Metti opacità a 100
+
+    // Data Corrente
+    const now = new Date()
+    // Giorno corrente (x padStart da trasformare prima in stringa)
+    // Tramite PadStart evito ogni volta di scrivere 0 di fronte a un numero
+    // Quindi se sarà una sola cifra, sarà accompagnata dallo 0 iniziale
+    // altrimenti, se già ha due cifre, non sarà presente lo 0
+    const day = `${now.getDate()}`.padStart(2, 0)
+    // Mese corrente
+    // + 1 perchè i mesi partono dal n°0,
+    const month = `${now.getMonth() + 1}`.padStart(2, 0)
+    // Anno corrente
+    const year = now.getFullYear()
+    // Ora corrente
+    const hour = `${now.getHours()}`.padStart(2, 0)
+    // Minuto Corrente
+    const minute = `${now.getMinutes()}`.padStart(2, 0)
+    // Day/Month/Year
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`
+
     // Pulisci i campi
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur() // Per rimuovere il Focus
@@ -206,10 +252,10 @@ btnLogin.addEventListener('click', (e) => {
 // Evento per trasferire denaro
 btnTransfer.addEventListener('click', (e) => {
   e.preventDefault() // Blocco il Refresh
-  const amountTransfer = Number(inputTransferAmount.value) // Quanto ammonta il trasferimento
+  const amountTransfer = +inputTransferAmount.value // Quanto ammonta il trasferimento
   const receiverAccount = accounts.find(acc => acc.username === inputTransferTo.value) // A chi devo trasferire
-  console.log(amountTransfer);
-  console.log(receiverAccount);
+  // console.log(amountTransfer);
+  // console.log(receiverAccount);
 
   // Verifica se ho abbastanza soldi
   if (amountTransfer > 0 && receiverAccount && currentAccount.balance >= amountTransfer && receiverAccount?.username !== currentAccount.username) {
@@ -217,6 +263,11 @@ btnTransfer.addEventListener('click', (e) => {
     currentAccount.movements.push(-amountTransfer)
     // Aggiungo all'account di chi riceve
     receiverAccount.movements.push(amountTransfer)
+    // Aggiungere data del trasferimento ( chi invia)
+    currentAccount.movementsDates.push(new Date().toISOString())
+    // Aggiungere data del trasferimento ( chi riceve)
+    receiverAccount.movementsDates.push(new Date().toISOString())
+
     // Update dell'UI
     updateUI(currentAccount)
   }
@@ -227,11 +278,13 @@ btnTransfer.addEventListener('click', (e) => {
 // Condizione con Some
 btnLoan.addEventListener('click', (e) => {
   e.preventDefault() // Tolgo il Refresh
-  const amountLoan = Number(inputLoanAmount.value)
+  const amountLoan = Math.floor(inputLoanAmount.value)
 
   if (amountLoan > 0 && currentAccount.movements.some(mov => mov >= amountLoan * 0.1)) {
     // Aggiungi il movement ai movimenti
     currentAccount.movements.push(amountLoan)
+    // Aggiungere data della richiesta prestito
+    currentAccount.movementsDates.push(new Date().toISOString())
     // Update UI
     updateUI(currentAccount)
     // Pulizia Campi
@@ -243,7 +296,7 @@ btnLoan.addEventListener('click', (e) => {
 btnClose.addEventListener('click', (e) => {
   e.preventDefault()
   const confirmUser = inputCloseUsername.value
-  const confirmPin = Number(inputClosePin.value)
+  const confirmPin = +inputClosePin.value
   if (confirmUser === currentAccount.username && currentAccount.pin === confirmPin) {
     // console.log("Puoi cancellare Account");
     const indexAccount = accounts.findIndex(acc => acc.username === currentAccount.username)
@@ -262,7 +315,7 @@ btnClose.addEventListener('click', (e) => {
 let sorted = false // State iniziale False
 btnSort.addEventListener('click', (e) => {
   e.preventDefault() // Rimuovo il refresh
-  displayMovement(currentAccount.movements, !sorted) // Ora lo lascio a true
+  displayMovement(currentAccount, !sorted) // Ora lo lascio a true
   sorted = !sorted // Al click continuo a cambiare lo State
   // Serve apposta
 })
