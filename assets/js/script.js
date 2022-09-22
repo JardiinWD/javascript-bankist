@@ -1,10 +1,6 @@
 'use strict';
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// BANKIST APP
-
-// Data
+//#region data
 const account1 = {
   owner: 'Jonas Schmedtmann',
   movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
@@ -12,14 +8,14 @@ const account1 = {
   pin: 1111,
 
   movementsDates: [
-    '2019-11-18T21:31:17.178Z',
-    '2019-12-23T07:42:02.383Z',
-    '2020-01-28T09:15:04.904Z',
-    '2020-04-01T10:17:24.185Z',
-    '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2022-08-14T21:31:17.178Z',
+    '2022-09-17T07:42:02.383Z',
+    '2022-09-16T09:15:04.904Z',
+    '2022-09-17T10:17:24.185Z',
+    '2022-09-18T14:11:59.604Z',
+    '2022-09-18T17:01:17.194Z',
+    '2022-09-18T23:36:17.929Z',
+    '2022-09-19T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -32,14 +28,14 @@ const account2 = {
   pin: 2222,
 
   movementsDates: [
-    '2019-11-01T13:15:33.035Z',
-    '2019-11-30T09:48:16.867Z',
-    '2019-12-25T06:04:23.907Z',
-    '2020-01-25T14:18:46.235Z',
-    '2020-02-05T16:33:06.386Z',
-    '2020-04-10T14:43:26.374Z',
-    '2020-06-25T18:49:59.371Z',
-    '2020-07-26T12:01:20.894Z',
+    '2022-09-19T13:15:33.035Z',
+    '2022-09-18T09:48:16.867Z',
+    '2022-09-17T06:04:23.907Z',
+    '2022-09-17T14:18:46.235Z',
+    '2022-09-17T16:33:06.386Z',
+    '2022-09-16T14:43:26.374Z',
+    '2022-09-16T18:49:59.371Z',
+    '2022-09-16T12:01:20.894Z',
   ],
   currency: 'USD',
   locale: 'en-US',
@@ -47,7 +43,9 @@ const account2 = {
 
 const accounts = [account1, account2];
 
-// Elements
+//#endregion
+
+//#region DOM Elements
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
 const labelBalance = document.querySelector('.balance__value');
@@ -75,6 +73,45 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
+//#endregion
+
+//#region Functions
+
+/** Formattazione Data per i movimenti, depositi, loan etc
+ * 
+ * @param {date} date Data che prendo dal mio array di oggetti 
+ * @returns 
+ */
+const formatMovementDate = (date, locale) => {
+  const calcDaysPassed = (past, future) => Math.round(Math.abs(future - past) / (1000 * 60 * 60 * 24))
+  const dayPassed = calcDaysPassed(new Date(), date)
+  console.log(dayPassed);
+  if (dayPassed === 0) return 'Today'
+  if (dayPassed === 1) return 'Yesterday'
+  if (dayPassed <= 7) return `${dayPassed} days ago`
+  else {
+    // prendo le date dall'array con il suo Indice
+    /*     const day = `${date.getDate()}`.padStart(2, 0)
+        const month = `${date.getMonth() + 1}`.padStart(2, 0)
+        const year = date.getFullYear()
+        return `${day}/${month}/${year}` */
+    return new Intl.DateTimeFormat(locale).format(date)
+  }
+}
+
+/** Funzione per valuta internazionale
+ * 
+ * @param {number} value // Valore da formattare
+ * @param {string} locale // Zona locale / Proprietà oggetto locale
+ * @param {string} currency // Currency da prendere come riferimento
+ */
+const formatCur = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+  }).format(value)
+}
+
 /** Funzione che mostra a schermo i movimenti
  * 
  * @param {object} movements Array di movimenti 
@@ -89,12 +126,10 @@ const displayMovement = function (acc, sort = false) {
     // Decidere classi in caso di operazione positiva (deposito) o negativa
     const typeMovement = movement > 0 ? 'deposit' : 'withdrawal'
 
-    // prendo le date dall'array con il suo Indice
     const date = new Date(acc.movementsDates[index])
-    const day = `${date.getDate()}`.padStart(2, 0)
-    const month = `${date.getMonth() + 1}`.padStart(2, 0)
-    const year = date.getFullYear()
-    const displayDate = `${day}/${month}/${year}`
+    const displayDate = formatMovementDate(date, acc.locale)
+    // Valuta formattata internazionale
+    const formattedMov = formatCur(movement, acc.locale, acc.currency)
 
     const htmlMovement =
       `
@@ -104,7 +139,7 @@ const displayMovement = function (acc, sort = false) {
         <!-- /.movements__date -->
         <div class="movements__date">${displayDate}</div>
         <!-- /.movements__value -->
-        <div class="movements__value">${movement.toFixed(2)}€</div>
+        <div class="movements__value">${formattedMov}</div>
       </div>
       `
     // Inietto nel Container le nuove Row dinamiche
@@ -112,7 +147,7 @@ const displayMovement = function (acc, sort = false) {
   })
 }
 
-/**
+/** Funzione per generare gli username (es js/jd)
  * 
  * @param {object} accs Array di Account
  * @returns 
@@ -133,25 +168,18 @@ const createUsernames = function (accs) {
 // console.log("Verifica degli username della funzione");
 console.log(createUsernames(accounts))
 // console.log("--------------------");
-// console.log("Verifica del mio array di oggetti");
-// console.log(accounts);
-// console.log("--------------------");
+
 
 // Ora guardo i depositi sul conto dell'utente
 const depositsFilter = movements.filter(element => element > 0)
 // Ora guardo i Ritiri da parte dell'utente
 const withdrawlFilter = movements.filter(element => element < 0)
-// console.log("Questo array filtrato per depositi");
-// console.log(depositsFilter);
-// console.log("-------------");
-// console.log("Questo array filtrato per Ritiri");
-// console.log(withdrawlFilter);
-// console.log("-------------");
+
 
 // Mostro a display il mio current balance
 const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, curr) => acc + curr, 0)
-  labelBalance.textContent = `${acc.balance.toFixed(2)}€`
+  labelBalance.textContent = formatCur(acc.balance, acc.locale, acc.currency)
 }
 
 const calcDisplaySummary = function (acc) {
@@ -171,9 +199,9 @@ const calcDisplaySummary = function (acc) {
     .filter(interest => interest >= 1)
     .reduce((acc, int) => acc + int, 0)
   // Aggiungo la mia variabile incomes e la mostro nel DOM
-  labelSumIn.textContent = `${incomes.toFixed(2)}€`
-  labelSumOut.textContent = `${Math.abs(outcomes).toFixed(2)}€`
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`
+  labelSumIn.textContent = formatCur(incomes, acc.locale, acc.currency)
+  labelSumOut.textContent = formatCur(Math.abs(outcomes), acc.locale, acc.currency)
+  labelSumInterest.textContent = formatCur(interest, acc.locale, acc.currency)
 }
 
 const maxMovements = movements.reduce((acc, cur) => {
@@ -189,7 +217,7 @@ const maxMovements = movements.reduce((acc, cur) => {
   // Come valore iniziale prendiamo primo numero dell'array
 }, movements[0])
 
-// onsole.log("Questo è il numero più alto nell'array di Movements");
+// console.log("Questo è il numero più alto nell'array di Movements");
 // console.log(maxMovements);
 
 const updateUI = (acc) => {
@@ -201,15 +229,41 @@ const updateUI = (acc) => {
   calcDisplaySummary(acc)
 }
 
+const startLogOutTimer = () => {
+  // Creo la mia funzione CallBack
+  const tick = () => {
+    const min = String(Math.trunc(timer / 60)).padStart(2, 0)
+    const sec = String(timer % 60).padStart(2, 0)
+    // In ogni chiamata (callBack), stampare il tempo rimanente in UI
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // Quando il tempo scade, fermare il timer e fare il logout
+    if (timer === 0) {
+      clearInterval(timerInterval)
+      labelWelcome.textContent = `Log in to get started` // Rimuovo Login
+      containerApp.style.opacity = 0; // Metti opacità a 0
+    }
+
+    // Decrementare di un secondo
+    timer--
+  }
+
+  // Settare tempo a 5min
+  let timer = 300;
+
+  // Chiamare il timer ogni secondo
+  tick() // La invoco subito
+  const timerInterval = setInterval(tick, 1000)
+  return timerInterval // Eseguo ritorno per il clear
+}
+
+//#endregion
+
+//#region Events
+
+let currentAccount, timerInterval;
+
 // Evento al Click per il login
-let currentAccount; // Dichiaro senza assegnare
-
-// Fake always login
-currentAccount = account1
-updateUI(currentAccount)
-containerApp.style.opacity = 100;
-
-// Button al Login iniziale
 btnLogin.addEventListener('click', (e) => {
   e.preventDefault() // Previene il reload al click
   console.log("Login"); // Verifica in console
@@ -222,28 +276,30 @@ btnLogin.addEventListener('click', (e) => {
     containerApp.style.opacity = 100; // Metti opacità a 100
 
     // Data Corrente
+    // Internationalizing Dates
     const now = new Date()
-    // Giorno corrente (x padStart da trasformare prima in stringa)
-    // Tramite PadStart evito ogni volta di scrivere 0 di fronte a un numero
-    // Quindi se sarà una sola cifra, sarà accompagnata dallo 0 iniziale
-    // altrimenti, se già ha due cifre, non sarà presente lo 0
-    const day = `${now.getDate()}`.padStart(2, 0)
-    // Mese corrente
-    // + 1 perchè i mesi partono dal n°0,
-    const month = `${now.getMonth() + 1}`.padStart(2, 0)
-    // Anno corrente
-    const year = now.getFullYear()
-    // Ora corrente
-    const hour = `${now.getHours()}`.padStart(2, 0)
-    // Minuto Corrente
-    const minute = `${now.getMinutes()}`.padStart(2, 0)
-    // Day/Month/Year
-    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`
+    // Opzioni da inserire all'interno dell'api
+    const options = {
+      hour: 'numeric', // Output => 10
+      minute: 'numeric', // Output => 50
+      day: 'numeric', // Output => 21
+      month: 'long', // Output => settembre
+      year: 'numeric', // Output => 2022
+      // weekday: 'long' // Output => mercoledi
+    }
+    const local = currentAccount.locale // Aggiungo il local del mio oggetto alla costante
+    console.log(local);
+    // Intl.DateTimeFormat => mia funzione API
+    labelDate.textContent = new Intl.DateTimeFormat(local, options).format(now)
 
     // Pulisci i campi
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur() // Per rimuovere il Focus
-
+    // Invoco la mia funzione timer
+    if (timerInterval) {
+      clearInterval(timerInterval)
+    }
+    timerInterval = startLogOutTimer()
     // Update dell'UI
     updateUI(currentAccount)
   }
@@ -259,6 +315,7 @@ btnTransfer.addEventListener('click', (e) => {
 
   // Verifica se ho abbastanza soldi
   if (amountTransfer > 0 && receiverAccount && currentAccount.balance >= amountTransfer && receiverAccount?.username !== currentAccount.username) {
+
     // Rimuovo dall'account di chi spedisce
     currentAccount.movements.push(-amountTransfer)
     // Aggiungo all'account di chi riceve
@@ -270,6 +327,11 @@ btnTransfer.addEventListener('click', (e) => {
 
     // Update dell'UI
     updateUI(currentAccount)
+
+    // Reset Timer
+    clearInterval(timerInterval)
+    // Restart del timer
+    timerInterval = startLogOutTimer();
   }
   // Ripulisco i campi
   inputTransferAmount.value = inputTransferTo.value = ''
@@ -281,12 +343,21 @@ btnLoan.addEventListener('click', (e) => {
   const amountLoan = Math.floor(inputLoanAmount.value)
 
   if (amountLoan > 0 && currentAccount.movements.some(mov => mov >= amountLoan * 0.1)) {
-    // Aggiungi il movement ai movimenti
-    currentAccount.movements.push(amountLoan)
-    // Aggiungere data della richiesta prestito
-    currentAccount.movementsDates.push(new Date().toISOString())
-    // Update UI
-    updateUI(currentAccount)
+
+    // Richiesta di un prestito ottenuto dopo 2.5 secondi
+    setTimeout(() => {
+      // Aggiungi il movement ai movimenti
+      currentAccount.movements.push(amountLoan)
+      // Aggiungere data della richiesta prestito
+      currentAccount.movementsDates.push(new Date().toISOString())
+      // Update UI
+      updateUI(currentAccount)
+      // Reset Timer
+      clearInterval(timerInterval)
+      // Restart del timer
+      timerInterval = startLogOutTimer();
+    }, 2500);
+
     // Pulizia Campi
     inputLoanAmount.value = ''
   }
@@ -312,22 +383,16 @@ btnClose.addEventListener('click', (e) => {
   inputCloseUsername.value = inputClosePin.value = ''
 })
 
-let sorted = false // State iniziale False
+// State iniziale False
+let sorted = false
+// Evento per ordinare in base a depositi
 btnSort.addEventListener('click', (e) => {
   e.preventDefault() // Rimuovo il refresh
   displayMovement(currentAccount, !sorted) // Ora lo lascio a true
   sorted = !sorted // Al click continuo a cambiare lo State
   // Serve apposta
 })
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
 
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
-
+//#endregion
 
 
