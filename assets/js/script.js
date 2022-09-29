@@ -2,7 +2,7 @@
 
 //#region data
 const account1 = {
-  owner: 'Jonas Schmedtmann',
+  owner: 'Alessandro Pecorilla',
   movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
   interestRate: 1.2, // %
   pin: 1111,
@@ -18,7 +18,7 @@ const account1 = {
     '2022-09-19T10:51:36.790Z',
   ],
   currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+  locale: 'it-IT', // de-DE
 };
 
 const account2 = {
@@ -135,7 +135,7 @@ const displayMovement = function (acc, sort = false) {
       `
       <div class="movements__row">
         <!-- /.movements__type movements__type--deposit -->
-        <div class="movements__type movements__type--${typeMovement}">${index + 1} ${typeMovement}</div>
+        <div class="movements__type movements__type--${typeMovement}"><!-- ${index + 1} --> ${typeMovement}</div>
         <!-- /.movements__date -->
         <div class="movements__date">${displayDate}</div>
         <!-- /.movements__value -->
@@ -169,12 +169,10 @@ const createUsernames = function (accs) {
 console.log(createUsernames(accounts))
 // console.log("--------------------");
 
-
 // Ora guardo i depositi sul conto dell'utente
 const depositsFilter = movements.filter(element => element > 0)
 // Ora guardo i Ritiri da parte dell'utente
 const withdrawlFilter = movements.filter(element => element < 0)
-
 
 // Mostro a display il mio current balance
 const calcDisplayBalance = function (acc) {
@@ -249,7 +247,7 @@ const startLogOutTimer = () => {
   }
 
   // Settare tempo a 5min
-  let timer = 300;
+  let timer = 10;
 
   // Chiamare il timer ogni secondo
   tick() // La invoco subito
@@ -272,7 +270,7 @@ btnLogin.addEventListener('click', (e) => {
 
   if (currentAccount?.pin === +inputLoginPin.value) {
     // console.log("Si, il pin è giusto");
-    labelWelcome.textContent = `Benvenuto, ${currentAccount.owner.split(' ')[0]}`
+    labelWelcome.textContent = `Welcome, ${currentAccount.owner.split(' ')[0]}`
     containerApp.style.opacity = 100; // Metti opacità a 100
 
     // Data Corrente
