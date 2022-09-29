@@ -2,6 +2,8 @@
 
 This Web app simulates an online account manager where users can log in with their username and pin. The application was created step by step following Jonas Schmedtmann's online bootcamp.
 
+![Screenshot App](./assets/img/Bankist-app.png)
+
 ## **Tag head**
 
 Inside the `head` tag there are all the links necessary for the page `style`. The links are:
